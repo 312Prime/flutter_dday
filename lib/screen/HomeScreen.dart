@@ -9,6 +9,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  DateTime selectedDate = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
           width: MediaQuery.of(context).size.width,
           child: Column(
             children: [
-              _TopPart(),
+              _TopPart(
+                selectedDate: selectedDate,
+                onPressed: onHeartPressed,
+              ),
               _BottomPart(),
             ],
           ),
@@ -26,80 +35,87 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  onHeartPressed() {
+    final DateTime now = DateTime.now();
+
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            color: Colors.white,
+            height: 300.0,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: selectedDate,
+              maximumDate: DateTime(
+                now.year,
+                now.month,
+                now.day,
+              ),
+              onDateTimeChanged: (DateTime date) {
+                setState(() {
+                  selectedDate = date;
+                });
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _TopPart extends StatelessWidget {
-  const _TopPart({super.key});
+  final DateTime selectedDate;
+  final VoidCallback onPressed;
+
+  _TopPart({required this.selectedDate, required this.onPressed, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final textTheme = theme.textTheme;
+
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text(
             'Since we met',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'flower',
-              fontSize: 70.0,
-            ),
+            style: textTheme.displayLarge,
           ),
           Column(
             children: [
               Text(
                 '우리 처음 만난 날',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'nanum',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 30.0,
-                ),
+                style: textTheme.displayMedium,
               ),
               Text(
-                '2021.11.23',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'nanum',
-                  fontSize: 20.0,
-                ),
+                '${selectedDate.year}.${selectedDate.month}.${selectedDate.day}',
+                style: textTheme.displaySmall,
               ),
             ],
           ),
           IconButton(
               iconSize: 60.0,
-              onPressed: () {
-                showCupertinoDialog(
-                  context: context,
-                  barrierDismissible: true,
-                  builder: (BuildContext context) {
-                    return Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        color: Colors.white,
-                        height: 300.0,
-                        child: CupertinoDatePicker(
-                          mode: CupertinoDatePickerMode.date,
-                          onDateTimeChanged: (DateTime date) {
-                            print(date);
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+              onPressed: onPressed,
               icon: Icon(
                 Icons.favorite,
                 color: Colors.red,
               )),
           Text(
-            'D+1',
-            style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'nanum',
-                fontSize: 50.0,
-                fontWeight: FontWeight.w600),
+            'D+${DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                ).difference(selectedDate).inDays + 1}',
+            style: textTheme.headlineMedium,
           ),
         ],
       ),
